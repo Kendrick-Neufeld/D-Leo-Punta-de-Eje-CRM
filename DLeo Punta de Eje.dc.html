@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@keyframes toastIn { from { opacity:0; transform:translate(-50%,10px); } to { opacity:1; transform:translate(-50%,0); } }
+.no-bar::-webkit-scrollbar { display:none; }
+.no-bar { scrollbar-width:none; }
+body { margin:0; }
+a { color:#F5A524; }
+a:hover { color:#ffbf4d; }
+.no-bar { scrollbar-width:none; -ms-overflow-style:none; }
+.no-bar::-webkit-scrollbar { display:none; width:0; height:0; }
+</style>
+</helmet>
+<div style="min-height:100vh; width:100%; background:#0B0E14; display:flex; align-items:center; justify-content:center; padding:32px 12px; font-family:'Inter',system-ui,sans-serif; box-sizing:border-box;">
+  <div style="width:390px; height:844px; background:#10161F; border-radius:44px; overflow:hidden; position:relative; box-shadow:0 40px 90px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06); display:flex; flex-direction:column;">
+
+    <div style="flex-shrink:0; height:46px; display:flex; align-items:center; justify-content:space-between; padding:0 26px; color:#F4F6F9; font-size:15px; font-weight:600; position:relative; z-index:5;">
+      <span>9:41</span>
+      <div style="position:absolute; top:8px; left:50%; transform:translateX(-50%); width:100px; height:26px; background:#000; border-radius:16px;"></div>
+      <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
+        <span>📶</span><span>🔋</span>
+      </div>
+    </div>
+
+    <div style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;">
+
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div class="no-bar" style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:22px 18px 28px; display:flex; flex-direction:column; gap:22px;">
+          <div>
+            <div style="color:#8B96A8; font-size:13px; font-weight:500;">Hola, Leo 👋</div>
+            <div style="color:#F4F6F9; font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:700;">Resumen de hoy</div>
+          </div>
+
+          <div class="no-bar" onScroll="{{ onKpiScroll }}" style="display:flex; gap:12px; overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-snap-type:x proximity; padding-bottom:4px;">
+            <div style="min-width:150px; background:#1A2130; border-radius:18px; padding:16px; flex-shrink:0; scroll-snap-align:start;">
+              <div style="color:#8B96A8; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px;">Ventas (hoy)</div>
+              <div style="color:#F4F6F9; font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:700; margin-top:6px;">{{ ventasHoyFmt }}</div>
+            </div>
+            <div style="min-width:150px; background:#1A2130; border-radius:18px; padding:16px; flex-shrink:0; scroll-snap-align:start;">
+              <div style="color:#8B96A8; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px;">Fiado pendiente</div>
+              <div style="color:#F5A524; font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:700; margin-top:6px;">{{ pendienteFmt }}</div>
+            </div>
+            <div style="min-width:150px; background:#1A2130; border-radius:18px; padding:16px; flex-shrink:0; scroll-snap-align:start;">
+              <div style="color:#8B96A8; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px;">Cobrado (hoy)</div>
+              <div style="color:#3DD68C; font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:700; margin-top:6px;">{{ cobradoFmt }}</div>
+            </div>
+            <div style="min-width:150px; background:#1A2130; border-radius:18px; padding:16px; flex-shrink:0; scroll-snap-align:start;">
+              <div style="color:#8B96A8; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px;">Deudores activos</div>
+              <div style="color:#F4F6F9; font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:700; margin-top:6px;">{{ activosCount }}</div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:center; gap:6px;">
+            <sc-for list="{{ kpiDots }}" as="dot" hint-placeholder-count="4">
+              <div style="width:{{ dot.w }}px; height:6px; border-radius:3px; background:{{ dot.bg }}; transition:width 0.2s;"></div>
+            </sc-for>
+          </div>
+
+          <div style="background:#1A2130; border-radius:18px; padding:18px;">
+            <div style="color:#F4F6F9; font-size:14px; font-weight:600; margin-bottom:12px;">Cobrado vs. pendiente</div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; color:#8B96A8; margin-bottom:8px;">
+              <span>Cobrado: <span style="color:#3DD68C; font-weight:700;">{{ cobradoFmt }}</span></span>
+              <span>Pendiente: <span style="color:#F5A524; font-weight:700;">{{ pendienteFmt }}</span></span>
+            </div>
+            <div style="height:10px; background:#212B3D; border-radius:999px; overflow:hidden;">
+              <div style="height:100%; background:#3DD68C; border-radius:999px; width: {{ progressPct }}%;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <div style="color:#F4F6F9; font-size:15px; font-weight:700;">Deudores recientes</div>
+              <div onClick="{{ goDebtors }}" style="color:#F5A524; font-size:13px; font-weight:600; cursor:pointer;">Ver todos →</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <sc-for list="{{ recentView }}" as="d" hint-placeholder-count="3">
+                <div onClick="{{ goDebtors }}" style="display:flex; align-items:center; gap:12px; background:#1A2130; border-radius:14px; padding:12px 14px; cursor:pointer;">
+                  <div style="width:38px; height:38px; border-radius:12px; background:#212B3D; color:#F5A524; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">{{ d.initials }}</div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="color:#F4F6F9; font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ d.name }}</div>
+                    <div style="color:#8B96A8; font-size:12px; margin-top:2px;">{{ d.daysText }}</div>
+                  </div>
+                  <div style="text-align:right; flex-shrink:0;">
+                    <div style="color:#F4F6F9; font-size:14px; font-weight:700;">{{ d.amountFmt }}</div>
+                    <div style="display:inline-block; margin-top:4px; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:{{ d.statusBg }}; color:{{ d.statusColor }};">{{ d.statusLabel }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1; min-height:0; display:flex; flex-direction:column;">
+          <div style="padding:20px 18px 12px; flex-shrink:0;">
+            <div style="color:#8B96A8; font-size:13px; font-weight:500;">💬 Chat IA</div>
+            <div style="color:#F4F6F9; font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:700;">Registra por WhatsApp</div>
+          </div>
+          <div class="no-bar" style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:6px 16px; display:flex; flex-direction:column; gap:12px;">
+            <sc-for list="{{ chatMessagesView }}" as="m" hint-placeholder-count="4">
+              <sc-if value="{{ m.isOwner }}" hint-placeholder-val="{{ true }}">
+                <div style="align-self:flex-end; max-width:78%; background:#F5A524; color:#10161F; padding:10px 14px; border-radius:16px 16px 4px 16px; font-size:14px; line-height:1.4;">
+                  <div>{{ m.text }}</div>
+                  <div style="font-size:10px; color:rgba(16,22,31,0.55); margin-top:4px; text-align:right;">{{ m.time }}</div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ m.isAi }}" hint-placeholder-val="{{ false }}">
+                <div style="align-self:flex-start; max-width:84%; background:#1A2130; color:#F4F6F9; padding:10px 14px; border-radius:16px 16px 16px 4px; font-size:14px; line-height:1.4;">
+                  <div>{{ m.text }}</div>
+                  <sc-if value="{{ m.parsed }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:8px; background:#212B3D; border-radius:12px; padding:10px 12px; display:flex; flex-direction:column; gap:6px;">
+                      <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:#8B96A8;">Cliente</span><span style="color:#F4F6F9; font-weight:600;">{{ m.parsed.cliente }}</span></div>
+                      <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:#8B96A8;">Monto</span><span style="color:#F5A524; font-weight:700;">{{ m.parsed.monto }}</span></div>
+                      <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:#8B96A8;">Fecha límite</span><span style="color:#F4F6F9; font-weight:600;">{{ m.parsed.fecha }}</span></div>
+                      <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px;"><span style="color:#8B96A8;">Estado</span><span style="background:rgba(61,214,140,0.16); color:#3DD68C; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px;">{{ m.parsed.estado }}</span></div>
+                    </div>
+                  </sc-if>
+                  <div style="font-size:10px; color:#8B96A8; margin-top:4px;">{{ m.time }}</div>
+                </div>
+              </sc-if>
+            </sc-for>
+          </div>
+          <div style="flex-shrink:0; padding:10px 16px 0; display:flex; gap:8px;">
+            <div onClick="{{ fillFiado }}" style="background:#1A2130; color:#F5A524; font-size:12px; font-weight:600; padding:8px 14px; border-radius:999px; white-space:nowrap; cursor:pointer;">+ Fiado</div>
+            <div onClick="{{ fillPago }}" style="background:#1A2130; color:#3DD68C; font-size:12px; font-weight:600; padding:8px 14px; border-radius:999px; white-space:nowrap; cursor:pointer;">+ Pago</div>
+          </div>
+          <div style="flex-shrink:0; display:flex; align-items:center; gap:10px; padding:10px 16px 16px; background:#151B26; border-top:1px solid rgba(255,255,255,0.06);">
+            <input type="text" value="{{ chatInput }}" onChange="{{ onChatInputChange }}" placeholder="Escribe como si fuera WhatsApp…" style="flex:1; height:44px; background:#212B3D; border:none; border-radius:22px; padding:0 16px; color:#F4F6F9; font-size:14px; outline:none;"/>
+            <div onClick="{{ sendChat }}" style="width:44px; height:44px; border-radius:50%; background:#F5A524; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:18px; color:#10161F;">➤</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDebtors }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1; min-height:0; display:flex; flex-direction:column;">
+          <div style="padding:20px 18px 10px; flex-shrink:0;">
+            <div style="color:#8B96A8; font-size:13px; font-weight:500;">📋 Deudores</div>
+            <div style="color:#F4F6F9; font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:700;">{{ debtorsCountLabel }}</div>
+          </div>
+          <div class="no-bar" style="flex-shrink:0; display:flex; gap:8px; padding:0 16px 12px; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <div onClick="{{ filterTodos }}" style="padding:8px 14px; border-radius:999px; font-size:12px; font-weight:700; white-space:nowrap; cursor:pointer; background:{{ todosChipBg }}; color:{{ todosChipColor }};">Todos</div>
+            <div onClick="{{ filterVencidos }}" style="padding:8px 14px; border-radius:999px; font-size:12px; font-weight:700; white-space:nowrap; cursor:pointer; background:{{ vencidosChipBg }}; color:{{ vencidosChipColor }};">Vencidos</div>
+            <div onClick="{{ filterPorVencer }}" style="padding:8px 14px; border-radius:999px; font-size:12px; font-weight:700; white-space:nowrap; cursor:pointer; background:{{ porVencerChipBg }}; color:{{ porVencerChipColor }};">Por vencer</div>
+            <div onClick="{{ filterAlDia }}" style="padding:8px 14px; border-radius:999px; font-size:12px; font-weight:700; white-space:nowrap; cursor:pointer; background:{{ alDiaChipBg }}; color:{{ alDiaChipColor }};">Al día</div>
+          </div>
+          <div class="no-bar" style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 16px 20px; display:flex; flex-direction:column; gap:12px;">
+            <sc-for list="{{ debtorsView }}" as="d" hint-placeholder-count="4">
+              <div style="background:#1A2130; border-radius:16px; padding:14px 16px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:36px; height:36px; border-radius:11px; background:#212B3D; color:#F5A524; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">{{ d.initials }}</div>
+                  <div onClick="{{ d.onToggle }}" style="flex:1; min-width:0; cursor:pointer;">
+                    <div style="color:#F4F6F9; font-size:15px; font-weight:700;">{{ d.name }}</div>
+                    <div style="color:#8B96A8; font-size:12px; margin-top:2px;">{{ d.daysText }}</div>
+                  </div>
+                  <div style="text-align:right; flex-shrink:0;">
+                    <div style="color:#F4F6F9; font-size:15px; font-weight:700;">{{ d.amountFmt }}</div>
+                    <div style="display:inline-block; margin-top:4px; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; background:{{ d.statusBg }}; color:{{ d.statusColor }};">{{ d.statusLabel }}</div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                  <div onClick="{{ d.onRemind }}" style="flex:1; height:44px; border-radius:12px; border:1px solid rgba(245,165,36,0.4); color:#F5A524; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+                    <span>💬</span><span>Recordar</span>
+                  </div>
+                  <div onClick="{{ d.onOpenPayment }}" style="flex:1; height:44px; border-radius:12px; background:#F5A524; color:#10161F; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+                    <span>💵</span><span>Registrar pago</span>
+                  </div>
+                </div>
+                <sc-if value="{{ d.isPaymentOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:12px; background:#212B3D; border-radius:12px; padding:12px;">
+                    <div style="color:#8B96A8; font-size:12px; margin-bottom:8px;">Monto a registrar</div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                      <input type="number" value="{{ paymentAmount }}" onChange="{{ d.onAmountChange }}" style="flex:1; height:44px; background:#10161F; border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0 12px; color:#F4F6F9; font-size:14px; outline:none;"/>
+                      <div onClick="{{ d.onConfirmPartial }}" style="height:44px; padding:0 14px; border-radius:10px; background:#3DD68C; color:#10161F; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer; white-space:nowrap;">Confirmar</div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                      <div onClick="{{ d.onConfirmFull }}" style="flex:1; text-align:center; font-size:12px; color:#F5A524; font-weight:700; cursor:pointer; padding:6px 0;">Pago total ({{ d.amountFmt }})</div>
+                      <div onClick="{{ d.onClosePayment }}" style="flex:1; text-align:center; font-size:12px; color:#8B96A8; font-weight:600; cursor:pointer; padding:6px 0;">Cancelar</div>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ d.isExpanded }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.08); padding-top:10px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:12px; color:#8B96A8;">Tel: {{ d.phone }}</div>
+                    <sc-for list="{{ d.history }}" as="h" hint-placeholder-count="2">
+                      <div style="display:flex; justify-content:space-between; font-size:12px;">
+                        <span style="color:#8B96A8;">{{ h.date }} — {{ h.label }}</span>
+                        <span style="color:#F4F6F9; font-weight:600;">{{ h.amountFmt }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div class="no-bar" style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:20px 18px 28px; display:flex; flex-direction:column; gap:20px;">
+          <div>
+            <div style="color:#8B96A8; font-size:13px; font-weight:500;">⚙️ Ajustes</div>
+            <div style="color:#F4F6F9; font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:700;">Configuración</div>
+          </div>
+          <div style="background:#1A2130; border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px;">
+            <div style="width:52px; height:52px; border-radius:16px; background:#F5A524; color:#10161F; font-weight:800; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">{{ businessInitials }}</div>
+            <div style="min-width:0;">
+              <div style="color:#F4F6F9; font-size:16px; font-weight:700;">{{ businessName }}</div>
+              <div style="color:#8B96A8; font-size:13px; margin-top:2px;">{{ whatsappNumber }}</div>
+            </div>
+          </div>
+          <div style="background:#1A2130; border-radius:16px; overflow:hidden;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid rgba(255,255,255,0.06); gap:12px;">
+              <div style="min-width:0;">
+                <div style="color:#F4F6F9; font-size:14px; font-weight:600;">Recordatorios automáticos</div>
+                <div style="color:#8B96A8; font-size:12px; margin-top:2px;">Aviso por WhatsApp antes del vencimiento</div>
+              </div>
+              <div onClick="{{ toggleAutoReminders }}" style="width:50px; height:30px; border-radius:999px; background:{{ toggleBg }}; position:relative; cursor:pointer; flex-shrink:0;">
+                <div style="width:24px; height:24px; border-radius:50%; background:#fff; position:absolute; top:3px; left:{{ toggleLeft }}px; transition:left 0.15s;"></div>
+              </div>
+            </div>
+            <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
+              <div style="min-width:0;">
+                <div style="color:#F4F6F9; font-size:14px; font-weight:600;">Días para alerta "Por vencer"</div>
+                <div style="color:#8B96A8; font-size:12px; margin-top:2px;">Toca un número — marca en amarillo N días antes</div>
+              </div>
+              <div class="no-bar" style="display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-snap-type:x proximity; padding-bottom:2px;">
+                <sc-for list="{{ thresholdOptions }}" as="opt" hint-placeholder-count="10">
+                  <div onClick="{{ opt.onPick }}" style="width:44px; height:44px; border-radius:12px; background:{{ opt.bg }}; color:{{ opt.color }}; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; flex-shrink:0; cursor:pointer;">{{ opt.n }}</div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="background:#1A2130; border-radius:16px; overflow:hidden;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid rgba(255,255,255,0.06);">
+              <div style="color:#F4F6F9; font-size:14px; font-weight:600;">Moneda</div>
+              <div style="color:#8B96A8; font-size:14px;">RD$ (peso dominicano)</div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px;">
+              <div style="color:#F4F6F9; font-size:14px; font-weight:600;">Versión</div>
+              <div style="color:#8B96A8; font-size:14px;">1.0.0</div>
+            </div>
+          </div>
+          <div style="text-align:center; color:#F0554A; font-size:14px; font-weight:600; padding:14px; cursor:pointer;">Cerrar sesión</div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <div style="flex-shrink:0; display:flex; background:#151B26; border-top:1px solid rgba(255,255,255,0.08); padding:8px 4px 18px;">
+      <div onClick="{{ goDashboard }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0; min-height:48px; cursor:pointer;">
+        <span style="font-size:20px;">📊</span>
+        <span style="font-size:11px; font-weight:700; color:{{ navDashboardColor }};">Resumen</span>
+      </div>
+      <div onClick="{{ goChat }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0; min-height:48px; cursor:pointer;">
+        <span style="font-size:20px;">💬</span>
+        <span style="font-size:11px; font-weight:700; color:{{ navChatColor }};">Chat IA</span>
+      </div>
+      <div onClick="{{ goDebtors }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0; min-height:48px; cursor:pointer;">
+        <span style="font-size:20px;">📋</span>
+        <span style="font-size:11px; font-weight:700; color:{{ navDebtorsColor }};">Deudores</span>
+      </div>
+      <div onClick="{{ goSettings }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0; min-height:48px; cursor:pointer;">
+        <span style="font-size:20px;">⚙️</span>
+        <span style="font-size:11px; font-weight:700; color:{{ navSettingsColor }};">Ajustes</span>
+      </div>
+    </div>
+
+    <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; bottom:96px; left:50%; transform:translateX(-50%); background:#1F2937; color:#fff; padding:10px 18px; border-radius:999px; font-size:13px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.35); white-space:nowrap; z-index:50; animation:toastIn 0.25s ease;">{{ toast.message }}</div>
+    </sc-if>
+
+    <div onClick="{{ openManualFiado }}" style="position:absolute; right:18px; bottom:96px; width:56px; height:56px; border-radius:50%; background:#F5A524; color:#10161F; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700; box-shadow:0 10px 24px rgba(245,165,36,0.45); cursor:pointer; z-index:40;">+</div>
+
+    <sc-if value="{{ manualOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeManual }}" style="position:absolute; inset:0; background:rgba(0,0,0,0.55); z-index:60; display:flex; align-items:flex-end;">
+        <div onClick="{{ stopClick }}" style="width:100%; background:#151B26; border-radius:24px 24px 0 0; padding:20px 18px 28px; display:flex; flex-direction:column; gap:16px;">
+          <div style="width:36px; height:4px; border-radius:2px; background:#2A3344; margin:0 auto;"></div>
+          <div style="color:#F4F6F9; font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:700;">Registro manual</div>
+
+          <div style="display:flex; gap:8px; background:#0F141D; border-radius:14px; padding:4px;">
+            <div onClick="{{ setManualFiado }}" style="flex:1; text-align:center; padding:10px 0; border-radius:11px; font-size:13px; font-weight:700; cursor:pointer; background:{{ manualFiadoBg }}; color:{{ manualFiadoColor }};">Fiado</div>
+            <div onClick="{{ setManualPago }}" style="flex:1; text-align:center; padding:10px 0; border-radius:11px; font-size:13px; font-weight:700; cursor:pointer; background:{{ manualPagoBg }}; color:{{ manualPagoColor }};">Pago</div>
+          </div>
+
+          <div>
+            <div style="color:#8B96A8; font-size:12px; font-weight:600; margin-bottom:6px;">Cliente</div>
+            <input type="text" value="{{ manualName }}" onChange="{{ onManualNameChange }}" placeholder="Nombre del cliente" style="width:100%; height:48px; box-sizing:border-box; background:#212B3D; border:none; border-radius:12px; padding:0 14px; color:#F4F6F9; font-size:15px; outline:none;"/>
+          </div>
+
+          <div>
+            <div style="color:#8B96A8; font-size:12px; font-weight:600; margin-bottom:6px;">Monto (RD$)</div>
+            <input type="number" value="{{ manualAmount }}" onChange="{{ onManualAmountChange }}" placeholder="0" style="width:100%; height:48px; box-sizing:border-box; background:#212B3D; border:none; border-radius:12px; padding:0 14px; color:#F4F6F9; font-size:15px; outline:none;"/>
+          </div>
+
+          <sc-if value="{{ manualIsFiado }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="color:#8B96A8; font-size:12px; font-weight:600; margin-bottom:8px;">Plazo (días)</div>
+              <div style="display:flex; gap:8px;">
+                <sc-for list="{{ manualDaysOptions }}" as="opt" hint-placeholder-count="5">
+                  <div onClick="{{ opt.onPick }}" style="flex:1; text-align:center; padding:12px 0; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; background:{{ opt.bg }}; color:{{ opt.color }};">{{ opt.n }}</div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <div onClick="{{ submitManual }}" style="height:52px; border-radius:14px; background:#F5A524; color:#10161F; font-size:15px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer;">Guardar registro</div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900},&quot;businessName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;D'Leo Punta de Eje&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;whatsappNumber&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;+1 809 555 0100&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;autoRemindersDefault&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;reminderThresholdDefault&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:3,&quot;min&quot;:1,&quot;max&quot;:10,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  today = new Date('2026-08-14T00:00:00');
+  nextId = 9;
+
+  state = {
+    tab: 'dashboard',
+    filter: 'todos',
+    expandedId: null,
+    paymentPanelId: null,
+    paymentAmount: '',
+    cobradoHoy: 6200,
+    ventasHoy: 18400,
+    autoReminders: true,
+    reminderThreshold: 3,
+    toast: null,
+    chatInput: '',
+    kpiIndex: 0,
+    manualOpen: false,
+    manualType: 'fiado',
+    manualName: '',
+    manualAmount: '',
+    manualDays: 15,
+    debtors: [
+      { id: 1, name: 'Juan Pérez', phone: '809-555-0142', amount: 2500, dueDate: '2026-08-29', history: [{ date: '14 ago', label: 'Fiado registrado', amountFmt: 'RD$2,500' }] },
+      { id: 2, name: 'María Rodríguez', phone: '809-555-0177', amount: 4800, dueDate: '2026-08-16', history: [{ date: '12 ago', label: 'Pago parcial', amountFmt: '-RD$1,000' }, { date: '9 ago', label: 'Fiado registrado', amountFmt: 'RD$5,800' }] },
+      { id: 3, name: 'Carlos Jiménez', phone: '829-555-0198', amount: 1200, dueDate: '2026-08-10', history: [{ date: '26 jul', label: 'Fiado registrado', amountFmt: 'RD$1,200' }] },
+      { id: 4, name: 'Ana Feliz', phone: '849-555-0163', amount: 3600, dueDate: '2026-09-05', history: [{ date: '6 ago', label: 'Fiado registrado', amountFmt: 'RD$3,600' }] },
+      { id: 5, name: 'Luis Santos', phone: '809-555-0120', amount: 950, dueDate: '2026-08-15', history: [{ date: '1 ago', label: 'Fiado registrado', amountFmt: 'RD$950' }] },
+      { id: 6, name: 'Rosa Díaz', phone: '829-555-0111', amount: 7200, dueDate: '2026-08-05', history: [{ date: '20 jul', label: 'Fiado registrado', amountFmt: 'RD$7,200' }] },
+      { id: 7, name: 'Pedro Almonte', phone: '809-555-0199', amount: 2000, dueDate: '2026-08-30', history: [{ date: '13 ago', label: 'Fiado registrado', amountFmt: 'RD$2,000' }] },
+      { id: 8, name: 'Yolanda Cruz', phone: '849-555-0155', amount: 1500, dueDate: '2026-08-13', history: [{ date: '30 jul', label: 'Fiado registrado', amountFmt: 'RD$1,500' }] },
+    ],
+    chatMessages: [
+      { id: 1, from: 'owner', text: 'Se le fió $2,500 a Juan Pérez hoy, plazo de 15 días', time: '8:12 a.m.' },
+      { id: 2, from: 'ai', text: 'Fiado registrado ✅', time: '8:12 a.m.', parsed: { cliente: 'Juan Pérez', monto: 'RD$2,500', fecha: '29 ago 2026', estado: 'Activo' } },
+      { id: 3, from: 'owner', text: 'María Rodríguez pagó $1,000 hoy', time: '11:34 a.m.' },
+      { id: 4, from: 'ai', text: 'Pago registrado ✅', time: '11:34 a.m.', parsed: { cliente: 'María Rodríguez', monto: 'RD$1,000', fecha: 'Saldo: RD$4,800', estado: 'Parcial' } },
+    ],
+  };
+
+  componentDidMount() {
+    this.setState({
+      autoReminders: this.props.autoRemindersDefault ?? true,
+      reminderThreshold: this.props.reminderThresholdDefault ?? 3,
+    });
+  }
+
+  formatMoney(n) { return 'RD$' + Math.round(n).toLocaleString('en-US'); }
+  formatDate(d) { return d.getDate() + ' ' + this.months[d.getMonth()]; }
+  initials(name) { return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase(); }
+
+  statusMeta(status, paid) {
+    if (paid) return { label: 'Pagado', bg: 'rgba(61,214,140,0.14)', color: '#3DD68C' };
+    if (status === 'red') return { label: 'Vencido', bg: 'rgba(240,85,74,0.14)', color: '#F0554A' };
+    if (status === 'yellow') return { label: 'Por vencer', bg: 'rgba(240,195,60,0.14)', color: '#F0C33C' };
+    return { label: 'Al día', bg: 'rgba(61,214,140,0.14)', color: '#3DD68C' };
+  }
+
+  computeStatus(dueDateStr, amount) {
+    if (amount <= 0) return 'green';
+    const due = new Date(dueDateStr + 'T00:00:00');
+    const diff = Math.round((due - this.today) / 86400000);
+    if (diff < 0) return 'red';
+    if (diff <= this.state.reminderThreshold) return 'yellow';
+    return 'green';
+  }
+
+  daysText(dueDateStr, amount) {
+    if (amount <= 0) return 'Pagado por completo';
+    const due = new Date(dueDateStr + 'T00:00:00');
+    const diff = Math.round((due - this.today) / 86400000);
+    if (diff < 0) return `Venció hace ${-diff} día${-diff === 1 ? '' : 's'}`;
+    if (diff === 0) return 'Vence hoy';
+    return `Vence en ${diff} día${diff === 1 ? '' : 's'}`;
+  }
+
+  setTab(t) { this.setState({ tab: t }); }
+  setFilter(f) { this.setState({ filter: f }); }
+  toggleExpand(id) { this.setState(s => ({ expandedId: s.expandedId === id ? null : id })); }
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toast: { message: msg } });
+    this._toastTimer = setTimeout(() => this.setState({ toast: null }), 2600);
+  }
+
+  sendReminder(d) { this.showToast(`Recordatorio enviado a ${d.name} por WhatsApp ✓`); }
+  openPaymentPanel(d) { this.setState({ paymentPanelId: d.id, paymentAmount: String(d.amount) }); }
+  closePaymentPanel() { this.setState({ paymentPanelId: null, paymentAmount: '' }); }
+  setPaymentAmount(v) { this.setState({ paymentAmount: v }); }
+
+  confirmPayment(id, isFull) {
+    const debtors = this.state.debtors;
+    const idx = debtors.findIndex(x => x.id === id);
+    if (idx < 0) return;
+    const d = debtors[idx];
+    let amt = isFull ? d.amount : (parseFloat(this.state.paymentAmount) || 0);
+    amt = Math.max(0, Math.min(amt, d.amount));
+    if (amt <= 0) return;
+    const updated = { ...d, amount: d.amount - amt, history: [{ date: this.formatDate(this.today), label: (isFull || amt === d.amount) ? 'Pago completo' : 'Pago parcial', amountFmt: '-' + this.formatMoney(amt) }, ...d.history] };
+    const newDebtors = [...debtors]; newDebtors[idx] = updated;
+    this.setState({ debtors: newDebtors, paymentPanelId: null, paymentAmount: '', cobradoHoy: this.state.cobradoHoy + amt });
+    this.showToast(`Pago de ${this.formatMoney(amt)} registrado — ${d.name}`);
+  }
+
+  parseMessage(text) {
+    const amountMatch = text.match(/\$\s?([\d.,]+)/);
+    const amount = amountMatch ? parseInt(amountMatch[1].replace(/[.,]/g, ''), 10) : null;
+    const isPayment = /pag[oó]/i.test(text);
+    const nameMatch = text.match(/([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)+)/);
+    const name = nameMatch ? nameMatch[1] : null;
+    const plazoMatch = text.match(/(\d+)\s*d[ií]as?/i);
+    const plazoDays = plazoMatch ? parseInt(plazoMatch[1], 10) : 15;
+    if (!amount || !name) return null;
+    return { amount, isPayment, name, plazoDays };
+  }
+
+  onChatInputChange(e) { this.setState({ chatInput: e.target.value }); }
+  fillFiado() { this.setState({ chatInput: 'Se le fió $1,800 a Rafael Ortiz hoy, plazo de 10 días' }); }
+  fillPago() { this.setState({ chatInput: 'Carlos Jiménez pagó $500 hoy' }); }
+
+  sendChat() {
+    const text = this.state.chatInput.trim();
+    if (!text) return;
+    const ownerMsg = { id: this.nextId++, from: 'owner', text, time: 'ahora' };
+    this.setState({ chatMessages: [...this.state.chatMessages, ownerMsg], chatInput: '' });
+    setTimeout(() => {
+      const parsed = this.parseMessage(text);
+      let aiMsg;
+      let debtors = this.state.debtors;
+      let cobradoHoy = this.state.cobradoHoy;
+      if (!parsed) {
+        aiMsg = { id: this.nextId++, from: 'ai', text: 'No entendí bien 🤔 Intenta: "Se le fió $[monto] a [Nombre] hoy, plazo de [N] días"', time: 'ahora' };
+      } else if (parsed.isPayment) {
+        const idx = debtors.findIndex(d => d.name.toLowerCase().includes(parsed.name.toLowerCase()) || parsed.name.toLowerCase().includes(d.name.split(' ')[0].toLowerCase()));
+        if (idx < 0) {
+          aiMsg = { id: this.nextId++, from: 'ai', text: `No encontré a ${parsed.name} en la lista de deudores.`, time: 'ahora' };
+        } else {
+          const d = debtors[idx];
+          const amt = Math.min(parsed.amount, d.amount);
+          const updated = { ...d, amount: d.amount - amt, history: [{ date: this.formatDate(this.today), label: 'Pago registrado (vía Chat IA)', amountFmt: '-' + this.formatMoney(amt) }, ...d.history] };
+          debtors = [...debtors]; debtors[idx] = updated;
+          cobradoHoy += amt;
+          aiMsg = { id: this.nextId++, from: 'ai', text: 'Pago registrado ✅', time: 'ahora', parsed: { cliente: d.name, monto: this.formatMoney(amt), fecha: `Saldo: ${this.formatMoney(updated.amount)}`, estado: updated.amount <= 0 ? 'Pagado' : 'Parcial' } };
+        }
+      } else {
+        const due = new Date(this.today); due.setDate(due.getDate() + parsed.plazoDays);
+        const dueStr = due.toISOString().slice(0, 10);
+        const newDebtor = { id: this.nextId++, name: parsed.name, phone: '—', amount: parsed.amount, dueDate: dueStr, history: [{ date: this.formatDate(this.today), label: 'Fiado registrado (vía Chat IA)', amountFmt: this.formatMoney(parsed.amount) }] };
+        debtors = [newDebtor, ...debtors];
+        aiMsg = { id: this.nextId++, from: 'ai', text: 'Fiado registrado ✅', time: 'ahora', parsed: { cliente: parsed.name, monto: this.formatMoney(parsed.amount), fecha: this.formatDate(due) + ' 2026', estado: 'Activo' } };
+      }
+      this.setState({ chatMessages: [...this.state.chatMessages, aiMsg], debtors, cobradoHoy });
+    }, 700);
+  }
+
+  onKpiScroll(e) {
+    const w = e.target.clientWidth * 0.86;
+    const idx = Math.max(0, Math.min(3, Math.round(e.target.scrollLeft / w)));
+    if (idx !== this.state.kpiIndex) this.setState({ kpiIndex: idx });
+  }
+
+  openManual(type) { this.setState({ manualOpen: true, manualType: type, manualName: '', manualAmount: '', manualDays: 15 }); }
+  closeManual() { this.setState({ manualOpen: false }); }
+  setManualType(t) { this.setState({ manualType: t }); }
+  setManualName(v) { this.setState({ manualName: v }); }
+  setManualAmount(v) { this.setState({ manualAmount: v }); }
+  setManualDays(n) { this.setState({ manualDays: n }); }
+
+  submitManual() {
+    const name = this.state.manualName.trim();
+    const amount = parseFloat(this.state.manualAmount);
+    if (!name || !amount || amount <= 0) { this.showToast('Completa cliente y monto'); return; }
+    let debtors = this.state.debtors;
+    let cobradoHoy = this.state.cobradoHoy;
+    if (this.state.manualType === 'fiado') {
+      const idx = debtors.findIndex(d => d.name.toLowerCase() === name.toLowerCase());
+      const due = new Date(this.today); due.setDate(due.getDate() + this.state.manualDays);
+      const dueStr = due.toISOString().slice(0, 10);
+      if (idx >= 0) {
+        const d = debtors[idx];
+        const updated = { ...d, amount: d.amount + amount, dueDate: dueStr, history: [{ date: this.formatDate(this.today), label: 'Fiado registrado (manual)', amountFmt: this.formatMoney(amount) }, ...d.history] };
+        debtors = [...debtors]; debtors[idx] = updated;
+      } else {
+        debtors = [{ id: this.nextId++, name, phone: '—', amount, dueDate: dueStr, history: [{ date: this.formatDate(this.today), label: 'Fiado registrado (manual)', amountFmt: this.formatMoney(amount) }] }, ...debtors];
+      }
+      this.showToast(`Fiado de ${this.formatMoney(amount)} registrado — ${name}`);
+    } else {
+      const idx = debtors.findIndex(d => d.name.toLowerCase() === name.toLowerCase());
+      if (idx < 0) { this.showToast(`No encontré a ${name} en deudores`); return; }
+      const d = debtors[idx];
+      const amt = Math.min(amount, d.amount);
+      const updated = { ...d, amount: d.amount - amt, history: [{ date: this.formatDate(this.today), label: 'Pago registrado (manual)', amountFmt: '-' + this.formatMoney(amt) }, ...d.history] };
+      debtors = [...debtors]; debtors[idx] = updated;
+      cobradoHoy += amt;
+      this.showToast(`Pago de ${this.formatMoney(amt)} registrado — ${name}`);
+    }
+    this.setState({ debtors, cobradoHoy, manualOpen: false, manualName: '', manualAmount: '' });
+  }
+
+  buildManualDaysOptions() {
+    const opts = [7, 10, 15, 20, 30];
+    return opts.map(n => {
+      const active = this.state.manualDays === n;
+      return { n, active, bg: active ? '#F5A524' : '#212B3D', color: active ? '#10161F' : '#8B96A8', onPick: () => this.setManualDays(n) };
+    });
+  }
+
+  toggleAutoReminders() { this.setState(s => ({ autoReminders: !s.autoReminders })); }
+  incThreshold() { this.setState(s => ({ reminderThreshold: Math.min(10, s.reminderThreshold + 1) })); }
+  decThreshold() { this.setState(s => ({ reminderThreshold: Math.max(1, s.reminderThreshold - 1) })); }
+  setThreshold(n) { this.setState({ reminderThreshold: n }); }
+  buildThresholdOptions() {
+    const arr = [];
+    for (let n = 1; n <= 10; n++) {
+      const active = this.state.reminderThreshold === n;
+      arr.push({ n, active, bg: active ? '#F5A524' : '#212B3D', color: active ? '#10161F' : '#8B96A8', onPick: () => this.setThreshold(n) });
+    }
+    return arr;
+  }
+
+  buildDebtorsView() {
+    return this.state.debtors.map(d => {
+      const status = this.computeStatus(d.dueDate, d.amount);
+      const meta = this.statusMeta(status, d.amount <= 0);
+      return {
+        id: d.id, name: d.name, phone: d.phone,
+        amountFmt: this.formatMoney(d.amount),
+        dueDateFmt: this.formatDate(new Date(d.dueDate + 'T00:00:00')),
+        status, statusLabel: meta.label, statusBg: meta.bg, statusColor: meta.color,
+        daysText: this.daysText(d.dueDate, d.amount),
+        initials: this.initials(d.name),
+        isExpanded: this.state.expandedId === d.id,
+        isPaymentOpen: this.state.paymentPanelId === d.id,
+        history: d.history,
+        onToggle: () => this.toggleExpand(d.id),
+        onRemind: () => this.sendReminder(d),
+        onOpenPayment: () => this.openPaymentPanel(d),
+        onClosePayment: () => this.closePaymentPanel(),
+        onConfirmFull: () => this.confirmPayment(d.id, true),
+        onConfirmPartial: () => this.confirmPayment(d.id, false),
+        onAmountChange: (e) => this.setPaymentAmount(e.target.value),
+        sortKey: (status === 'red' ? 0 : status === 'yellow' ? 1 : 2) * 1e7 + new Date(d.dueDate).getTime() / 1e10,
+      };
+    });
+  }
+
+  renderVals() {
+    const allView = this.buildDebtorsView().sort((a, b) => a.sortKey - b.sortKey);
+    const filter = this.state.filter;
+    const filteredView = allView.filter(d => {
+      if (filter === 'todos') return true;
+      if (filter === 'vencidos') return d.status === 'red';
+      if (filter === 'por_vencer') return d.status === 'yellow';
+      if (filter === 'al_dia') return d.status === 'green';
+      return true;
+    });
+    const recentView = allView.slice(0, 3);
+    const pendienteTotal = this.state.debtors.reduce((s, d) => s + d.amount, 0);
+    const cobradoHoy = this.state.cobradoHoy;
+    const progressPct = Math.round((cobradoHoy / (cobradoHoy + pendienteTotal || 1)) * 100);
+    const activos = this.state.debtors.filter(d => d.amount > 0).length;
+    const activeChip = { bg: '#F5A524', color: '#10161F' };
+    const inactiveChip = { bg: '#1A2130', color: '#8B96A8' };
+    const chip = (name) => (filter === name ? activeChip : inactiveChip);
+    const businessName = this.props.businessName ?? "D'Leo Punta de Eje";
+
+    const chatMessagesView = this.state.chatMessages.map(m => ({
+      id: m.id, isOwner: m.from === 'owner', isAi: m.from === 'ai', text: m.text, time: m.time, parsed: m.parsed || null,
+    }));
+
+    const tab = this.state.tab;
+
+    return {
+      tab,
+      isDashboard: tab === 'dashboard', isChat: tab === 'chat', isDebtors: tab === 'debtors', isSettings: tab === 'settings',
+      goDashboard: () => this.setTab('dashboard'),
+      goChat: () => this.setTab('chat'),
+      goDebtors: () => this.setTab('debtors'),
+      goSettings: () => this.setTab('settings'),
+      navDashboardColor: tab === 'dashboard' ? '#F5A524' : '#8B96A8',
+      navChatColor: tab === 'chat' ? '#F5A524' : '#8B96A8',
+      navDebtorsColor: tab === 'debtors' ? '#F5A524' : '#8B96A8',
+      navSettingsColor: tab === 'settings' ? '#F5A524' : '#8B96A8',
+
+      businessName,
+      businessInitials: this.initials(businessName),
+      ventasHoyFmt: this.formatMoney(this.state.ventasHoy),
+      pendienteFmt: this.formatMoney(pendienteTotal),
+      cobradoFmt: this.formatMoney(cobradoHoy),
+      activosCount: activos,
+      progressPct,
+
+      recentView,
+      debtorsView: filteredView,
+      debtorsCountLabel: `${filteredView.length} cliente${filteredView.length === 1 ? '' : 's'}`,
+
+      filter,
+      filterTodos: () => this.setFilter('todos'),
+      filterVencidos: () => this.setFilter('vencidos'),
+      filterPorVencer: () => this.setFilter('por_vencer'),
+      filterAlDia: () => this.setFilter('al_dia'),
+      todosChipBg: chip('todos').bg, todosChipColor: chip('todos').color,
+      vencidosChipBg: chip('vencidos').bg, vencidosChipColor: chip('vencidos').color,
+      porVencerChipBg: chip('por_vencer').bg, porVencerChipColor: chip('por_vencer').color,
+      alDiaChipBg: chip('al_dia').bg, alDiaChipColor: chip('al_dia').color,
+
+      chatMessagesView,
+      chatInput: this.state.chatInput,
+      onChatInputChange: (e) => this.onChatInputChange(e),
+      sendChat: () => this.sendChat(),
+      fillFiado: () => this.fillFiado(),
+      fillPago: () => this.fillPago(),
+
+      paymentAmount: this.state.paymentAmount,
+
+      whatsappNumber: this.props.whatsappNumber ?? '+1 809 555 0100',
+      autoReminders: this.state.autoReminders,
+      toggleAutoReminders: () => this.toggleAutoReminders(),
+      toggleBg: this.state.autoReminders ? '#F5A524' : '#2A3344',
+      toggleLeft: this.state.autoReminders ? 23 : 3,
+      reminderThreshold: this.state.reminderThreshold,
+      thresholdOptions: this.buildThresholdOptions(),
+
+      toast: this.state.toast,
+
+      onKpiScroll: (e) => this.onKpiScroll(e),
+      kpiDots: [0, 1, 2, 3].map(i => ({ w: this.state.kpiIndex === i ? 18 : 6, bg: this.state.kpiIndex === i ? '#F5A524' : '#2A3344' })),
+
+      manualOpen: this.state.manualOpen,
+      openManualFiado: () => this.openManual('fiado'),
+      openManualPago: () => this.openManual('pago'),
+      closeManual: () => this.closeManual(),
+      manualType: this.state.manualType,
+      manualIsFiado: this.state.manualType === 'fiado',
+      manualIsPago: this.state.manualType === 'pago',
+      setManualFiado: () => this.setManualType('fiado'),
+      setManualPago: () => this.setManualType('pago'),
+      manualFiadoBg: this.state.manualType === 'fiado' ? '#F5A524' : '#212B3D',
+      manualFiadoColor: this.state.manualType === 'fiado' ? '#10161F' : '#8B96A8',
+      manualPagoBg: this.state.manualType === 'pago' ? '#F5A524' : '#212B3D',
+      manualPagoColor: this.state.manualType === 'pago' ? '#10161F' : '#8B96A8',
+      manualName: this.state.manualName,
+      onManualNameChange: (e) => this.setManualName(e.target.value),
+      manualAmount: this.state.manualAmount,
+      onManualAmountChange: (e) => this.setManualAmount(e.target.value),
+      manualDaysOptions: this.buildManualDaysOptions(),
+      submitManual: () => this.submitManual(),
+      stopClick: (e) => e.stopPropagation(),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
